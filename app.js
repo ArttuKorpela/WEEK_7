@@ -5,6 +5,8 @@ const passport = require('passport');
 const app = express();
 let users = [];
 let index = 0;
+let todosByUser = {};
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -110,6 +112,34 @@ app.get("/api/secret", checkAuthenticated, (req, res) => {
     res.status(200).send("Welcome to my secret page");
 })
 
+app.post('/api/todos',checkAuthenticated, (req, res) => {
+    
+    const userId = req.user.id;
+    const todo = req.body.todo;
+
+    if (!todosByUser[userId]) {
+        todosByUser[userId] = [];
+    }
+
+    todosByUser[userId].push(todo);
+
+    res.json({
+        id: userId,
+        todos: todosByUser[userId]
+    });
+
+});
+
+app.get('/api/todos/list', (req, res) => {
+    let allTodos = [];
+    for (const userId in todosByUser) {
+        allTodos.push({
+            id: userId,
+            todos: todosByUser[userId]
+        });
+    }
+    res.json(allTodos);
+});
 
 
 
