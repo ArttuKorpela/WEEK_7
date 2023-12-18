@@ -70,6 +70,11 @@ app.post('/api/user/login',checkNotAuthenticated,
     })(req, res, next);
   }
 );
+
+
+app.get("/",(req,res) => {
+    res.status(301).send("your ass got redirected")
+})
 /*
 app.post('/api/user/register', async (req, res) => {
     const login_info = req.body;
@@ -94,7 +99,7 @@ function checkAuthenticated(req, res, next) {
 
 function checkNotAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
-        return res.redirect("/api/sercret")
+        return res.redirect("/")
         
     }
     return next()
