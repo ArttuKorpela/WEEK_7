@@ -73,7 +73,7 @@ app.post('/api/user/login',checkNotAuthenticated,
 
 
 app.get("/",(req,res) => {
-    res.status(301).send("your ass got redirected")
+    res.status(200).send("your ass got redirected")
 })
 /*
 app.post('/api/user/register', async (req, res) => {
