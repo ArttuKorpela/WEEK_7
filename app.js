@@ -29,7 +29,7 @@ app.use(passport.session())
 
 
 
-app.post('/api/user/register', async (req, res) => {
+app.post('/api/user/register',checkNotAuthenticated, async (req, res) => {
     const login_info = req.body;
     index++
     const found = users.find((user) => user.username == login_info.username)
@@ -58,7 +58,7 @@ app.post('/api/user/login', passport.authenticate('local', {
 }))
 
 */
-app.post('/api/user/login', 
+app.post('/api/user/login',checkNotAuthenticated, 
   (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
       if (err) { return next(err); }
@@ -91,6 +91,15 @@ function checkAuthenticated(req, res, next) {
 
     return res.status(401).send("No Cookie, my boe")
 }
+
+function checkNotAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return res.redirect("/")
+        
+    }
+    return next()
+}
+
 
 app.get("/api/secret", checkAuthenticated, (req, res) => {
     res.status(200).send("Welcome to my secret page");
