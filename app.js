@@ -1,11 +1,33 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const session = require('express-session');
+const passport = require('passport');
 const app = express();
-app.use(express.json());
-
-
 let users = [];
 let index = 0;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(session({
+    secret: "ASFSDF#45jk242SDf3242sdf",
+    resave: false,
+    saveUninitialized: false
+}));
+
+function getUserById(id) {
+    return users.find((user) => user.id == id);
+}
+
+function getUserByUsername(username) {
+    return users.find((user) => user.username == username);
+}
+const initializePassport = require('./passport-config')
+initializePassport(passport, getUserByUsername, getUserById)
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+
 
 app.post('/api/user/register', async (req, res) => {
     const login_info = req.body;
@@ -28,10 +50,40 @@ app.post('/api/user/register', async (req, res) => {
         }
     }
     
-
-  
 });
+/*
+app.post('/api/user/login', passport.authenticate('local', {
+    successMessage: "Yes!",
+    failureMessage: "Nope"
+}))
 
+*/
+app.post('/api/user/login', 
+  (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+      if (err) { return next(err); }
+      if (!user) { return res.status(401).send('Invalid credentials'); }
+      req.logIn(user, (err) => {
+        if (err) { return next(err); }
+        return res.status(200).send('Logged in successfully');
+      });
+    })(req, res, next);
+  }
+);
+/*
+app.post('/api/user/register', async (req, res) => {
+    const login_info = req.body;
+    const found = users.find((user) => user.username == login_info.username)
+    if (found) {
+        if (await checkPassword) {
+            res
+        }
+    } else {
+
+
+
+});
+*/
 app.get("/api/user/list", (req,res) => {
     res.send(users);
 })
@@ -45,6 +97,14 @@ async function hashPassword(password){
         throw e;
     }
 }
+
+async function checkPassword(submittedPassword, storedHash) {
+    try {
+      return await bcrypt.compare(submittedPassword, storedHash);
+    } catch (error) {
+      throw error;
+    }
+  }
 
 const PORT = 3000;
 app.listen(PORT, () => {
