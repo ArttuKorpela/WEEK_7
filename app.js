@@ -84,6 +84,22 @@ app.post('/api/user/register', async (req, res) => {
 
 });
 */
+function checkAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next()
+    }
+
+    return res.status(401).send("No Cookie, my boe")
+}
+
+app.get("/api/secret", checkAuthenticated, (req, res) => {
+    res.status(200).send("Welcome to my secret page");
+})
+
+
+
+
+
 app.get("/api/user/list", (req,res) => {
     res.send(users);
 })
